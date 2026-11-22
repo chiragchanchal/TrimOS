@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrimOS 🍎 | The Ultra-Clean, Ad-Free Apple TV Environment for Android TV</title>
+  <meta name="description" content="Transform any sluggish, ad-bloated smart TV into a lightning-fast, Apple TV-inspired experience. Zero ads, ~22 MB RAM footprint, 32 built-in themes, and 100% reversible.">
+  <meta name="keywords" content="TrimOS, Android TV, Google TV, Apple TV launcher, debloat TV, ad-free smart TV, SmartTube, PatchWall removal, clean TV launcher">
+  <meta property="og:title" content="TrimOS 🍎 | The Ultra-Clean Apple TV Environment for Android TV">
+  <meta property="og:description" content="Transform any sluggish smart TV into an ultra-fast, 60fps, ad-free Apple TV experience with 32 themes, mobile touchpad remote, and 1-click restore.">
+  <meta property="og:image" content="docs/screenshots/01_home_apple_tv.png">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍎</text></svg>">
+  
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #000000;
+      --bg-card: rgba(18, 18, 22, 0.7);
+      --bg-card-hover: rgba(26, 26, 32, 0.85);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(255, 255, 255, 0.25);
+      --text-main: #f5f5f7;
+      --text-muted: #86868b;
+      --text-sub: #a1a1a6;
+      --accent: #2997ff;
+      --accent-glow: rgba(41, 151, 255, 0.35);
+      --purple: #bf5af2;
+      --emerald: #30d158;
+      --amber: #ff9f0a;
+      --red: #ff453a;
+      --glass-blur: blur(28px);
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-xl: 32px;
+      --font-mono: 'JetBrains Mono', monospace;
+      --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+      overflow-x: hidden;
+    }
+
+    body {
+      background: var(--bg);
+      position: relative;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* Ambient background radiance */
+    .ambient-glow {
+      position: absolute;
+      width: 700px;
+      height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--accent-glow) 0%, rgba(0, 0, 0, 0) 70%);
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+      filter: blur(80px);
+    }
+
+    .ambient-glow-purple {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(191, 90, 242, 0.25) 0%, rgba(0, 0, 0, 0) 70%);
+      top: 1400px;
+      right: -100px;
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(90px);
+    }
+
+    /* Top Navigation */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border-bottom: 1px solid var(--border);
+      transition: var(--transition);
+    }
+
+    .nav-container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-icon {
+      font-size: 1.5rem;
+      filter: drop-shadow(0 0 12px rgba(255, 69, 58, 0.4));
+    }
+
+    .badge-pill {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      color: var(--text-sub);
+      font-weight: 500;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+
+    nav a {
+      color: var(--text-sub);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    nav a:hover {
+      color: var(--text-main);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 980px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: var(--transition);
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+
+    .btn-primary {
+      background: var(--text-main);
+      color: #000;
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-primary:hover {
+      background: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 28px rgba(255, 255, 255, 0.35);
+    }
+
+    .btn-glass {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+    }
+
+    .btn-glass:hover {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: var(--border-focus);
+      transform: translateY(-2px);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 160px 0 80px;
+      text-align: center;
+      position: relative;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 980px;
+      background: rgba(41, 151, 255, 0.12);
+      border: 1px solid rgba(41, 151, 255, 0.28);
+      color: var(--accent);
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+      letter-spacing: -0.01em;
+    }
+
+    .hero-title {
+      font-size: clamp(2.8rem, 6.5vw, 5.2rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      margin-bottom: 24px;
+      max-width: 980px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero-title .gradient-text {
+      background: linear-gradient(135deg, #ffffff 30%, #8e8e93 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-title .apple-gradient {
+      background: linear-gradient(135deg, #2997ff 0%, #bf5af2 50%, #ff375f 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1.1rem, 2.2vw, 1.45rem);
+      color: var(--text-sub);
+      max-width: 780px;
+      margin: 0 auto 36px;
+      font-weight: 400;
+      line-height: 1.45;
+      letter-spacing: -0.01em;
+    }
+
+    .hero-cta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    /* Terminal Snippet Box */
+    .terminal-box {
+      max-width: 580px;
+      margin: 0 auto 56px;
+      background: rgba(18, 18, 22, 0.8);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .terminal-cmd {
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      color: #30d158;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .terminal-prompt {
+      color: var(--text-muted);
+      user-select: none;
+    }
+
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: var(--border-focus);
+    }
+
+    /* 4K TV Frame Mockup Showcase */
+    .tv-mockup-wrapper {
+      position: relative;
+      max-width: 1060px;
+      margin: 0 auto 60px;
+    }
+
+    .tv-frame {
+      background: #101014;
+      border: 12px solid #1a1a20;
+      border-radius: 20px;
+      box-shadow: 0 30px 100px rgba(0, 0, 0, 0.8), 0 0 80px rgba(41, 151, 255, 0.18);
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 16 / 9;
+    }
+
+    .tv-screen {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      background: #000;
+    }
+
+    .tv-screen img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .tv-screen-caption {
+      position: absolute;
+      bottom: 20px;
+      left: 24px;
+      right: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(20px);
+      padding: 10px 18px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .tv-stand {
+      width: 180px;
+      height: 16px;
+      background: linear-gradient(180deg, #2c2c34 0%, #15151a 100%);
+      margin: 0 auto;
+      border-radius: 0 0 8px 8px;
+    }
+
+    .tv-stand-base {
+      width: 320px;
+      height: 8px;
+      background: linear-gradient(90deg, transparent, #2c2c34 30%, #2c2c34 70%, transparent);
+      margin: 0 auto;
+      border-radius: 4px;
+    }
+
+    /* TV Interactive Switcher Pills */
+    .tv-pills {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .tv-pill-btn {
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      color: var(--text-sub);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tv-pill-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+
+    .tv-pill-btn.active {
+      background: var(--text-main);
+      color: #000;
+      font-weight: 600;
+      border-color: #fff;
+      box-shadow: 0 2px 14px rgba(255, 255, 255, 0.3);
+    }
+
+    /* Stats Grid */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin: 60px 0 100px;
+      padding: 30px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      backdrop-filter: var(--glass-blur);
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 10px;
+    }
+
+    .stat-value {
+      font-size: 2.6rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 6px;
+      background: linear-gradient(135deg, #fff 40%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--text-sub);
+      font-weight: 500;
+    }
+
+    /* Section Styling */
+    .section {
+      padding: 90px 0;
+      position: relative;
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 780px;
+      margin: 0 auto 60px;
+    }
+
+    .section-tag {
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: clamp(2.2rem, 4vw, 3.2rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 18px;
+    }
+
+    .section-desc {
+      font-size: 1.15rem;
+      color: var(--text-sub);
+      line-height: 1.5;
+    }
+
+    /* Interactive Before & After Slider */
+    .comparison-container {
+      max-width: 1040px;
+      margin: 0 auto;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #000;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.7);
+    }
+
+    .comparison-slider {
+      position: relative;
+      width: 100%;
+      height: 540px;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .comparison-side {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .side-before {
+      background: radial-gradient(circle at center, #1b1010 0%, #0d0606 100%);
+      color: #ff453a;
+    }
+
+    .side-after {
+      background: radial-gradient(circle at center, #0c1a2c 0%, #060b14 100%);
+      color: #30d158;
+      clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);
+      transition: clip-path 0.1s ease-out;
+    }
+
+    .comparison-divider {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 3px;
+      background: #fff;
+      cursor: ew-resize;
+      box-shadow: 0 0 14px rgba(255, 255, 255, 0.8);
+      z-index: 50;
+      transition: left 0.1s ease-out;
+    }
+
+    .divider-handle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 44px;
+      height: 44px;
+      background: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+      color: #000;
+      font-size: 1.2rem;
+    }
+
+    .comparison-content {
+      max-width: 460px;
+    }
+
+    .comparison-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .badge-bad {
+      background: rgba(255, 69, 58, 0.15);
+      border: 1px solid rgba(255, 69, 58, 0.35);
+      color: #ff453a;
+    }
+
+    .badge-good {
+      background: rgba(48, 209, 88, 0.15);
+      border: 1px solid rgba(48, 209, 88, 0.35);
+      color: #30d158;
+    }
+
+    .comparison-heading {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 14px;
+      letter-spacing: -0.02em;
+    }
+
+    .comparison-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .comparison-list li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1rem;
+      color: #e5e5ea;
+    }
+
+    /* Bento Grid Showcase */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .bento-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 36px;
+      backdrop-filter: var(--glass-blur);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .bento-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-focus);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .bento-card-8 {
+      grid-column: span 8;
+    }
+
+    .bento-card-4 {
+      grid-column: span 4;
+    }
+
+    .bento-card-6 {
+      grid-column: span 6;
+    }
+
+    .bento-card-12 {
+      grid-column: span 12;
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+    }
+
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+
+    .card-desc {
+      color: var(--text-sub);
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    .card-media {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #000;
+    }
+
+    .card-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.5s ease;
+    }
+
+    .bento-card:hover .card-media img {
+      transform: scale(1.02);
+    }
+
+    /* Live Interactive Interactive RAM Cleaner Widget */
+    .ram-cleaner-widget {
+      background: #0d0d12;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      text-align: center;
+    }
+
+    .ram-meter-circle {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 8px solid rgba(255, 255, 255, 0.1);
+      border-top-color: var(--emerald);
+      margin: 0 auto 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      transition: transform 0.6s ease;
+    }
+
+    .ram-val {
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+
+    .ram-lbl {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .clean-btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(48, 209, 88, 0.15);
+      border: 1px solid rgba(48, 209, 88, 0.3);
+      color: var(--emerald);
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .clean-btn:hover {
+      background: var(--emerald);
+      color: #000;
+    }
+
+    /* Theme Gallery Grid */
+    .themes-carousel {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .theme-thumb-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .theme-thumb-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+    }
+
+    .theme-thumb-card img {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      display: block;
+    }
+
+    .theme-info {
+      padding: 14px 18px;
+    }
+
+    .theme-name {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .theme-tags {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Compatibility Table */
+    .compat-table-wrapper {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow-x: auto;
+      backdrop-filter: var(--glass-blur);
+    }
+
+    .compat-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .compat-table th, .compat-table td {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .compat-table th {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .compat-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .compat-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .brand-col {
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tag-clean {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(48, 209, 88, 0.12);
+      border: 1px solid rgba(48, 209, 88, 0.25);
+      color: #30d158;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    /* Quick Start Steps */
+    .steps-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+    }
+
+    .step-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 36px;
+      backdrop-filter: var(--glass-blur);
+      position: relative;
+    }
+
+    .step-num {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #000;
+      font-weight: 800;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .step-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .step-desc {
+      color: var(--text-sub);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .code-block {
+      background: #08080a;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: #30d158;
+      overflow-x: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Languages Grid */
+    .languages-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .lang-item {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      text-decoration: none;
+      color: var(--text-main);
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: var(--transition);
+    }
+
+    .lang-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    /* FAQ Accordion */
+    .faq-grid {
+      max-width: 840px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .faq-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .faq-item:hover {
+      border-color: var(--border-focus);
+    }
+
+    .faq-question {
+      font-size: 1.15rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .faq-answer {
+      color: var(--text-sub);
+      font-size: 0.95rem;
+      margin-top: 14px;
+      line-height: 1.6;
+      display: none;
+    }
+
+    .faq-item.open .faq-answer {
+      display: block;
+    }
+
+    .faq-item.open .faq-icon {
+      transform: rotate(180deg);
+    }
+
+    .faq-icon {
+      transition: transform 0.3s ease;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      background: #000;
+      padding: 80px 0 40px;
+      margin-top: 100px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .footer-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .footer-links a {
+      color: var(--text-sub);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: #fff;
+    }
+
+    .footer-bottom {
+      text-align: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 30px;
+      font-size: 0.85rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .bento-card-8, .bento-card-4, .bento-card-6 {
+        grid-column: span 12;
+      }
+      .nav-links {
+        display: none;
+      }
+      .comparison-slider {
+        height: 600px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ambient-glow"></div>
+  <div class="ambient-glow-purple"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="nav-container">
+      <a href="#" class="brand">
+        <span class="brand-icon">🍎</span>
+        <span>TrimOS</span>
+        <span class="badge-pill">v1.0.0</span>
+      </a>
+
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#comparison">Before & After</a>
+        <a href="#themes">32 Themes</a>
+        <a href="#compatibility">TVs</a>
+        <a href="#quickstart">Quick Start</a>
+        <a href="#languages">Languages</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="https://github.com/chiragchanchal/TrimOS" target="_blank" class="btn btn-glass">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+          <span>Star on GitHub</span>
+        </a>
+        <a href="release/TrimOS-v1.0.apk" class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>Download APK</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero container">
+      <div class="hero-tag">
+        <span>✨ The Clean Apple TV Environment for Android TV & Google TV</span>
+      </div>
+
+      <h1 class="hero-title">
+        <span class="gradient-text">Your TV, Reimagined.</span><br>
+        <span class="apple-gradient">Zero Ads. Lightning Fast.</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        Transform sluggish, ad-bloated smart TVs into a pure 60fps experience inspired by Apple TV. Zero root required, ~22 MB RAM footprint, 32 built-in themes, and 100% reversible.
+      </p>
+
+      <div class="hero-cta">
+        <a href="#quickstart" class="btn btn-primary" style="padding: 14px 28px; font-size: 1.05rem;">
+          <span>🚀 1-Click Quick Install</span>
+        </a>
+        <a href="release/TrimOS-v1.0.apk" class="btn btn-glass" style="padding: 14px 24px; font-size: 1.05rem;">
+          <span>📦 Download TrimOS v1.0.apk</span>
+        </a>
+      </div>
+
+      <!-- Copyable Terminal Command -->
+      <div class="terminal-box">
+        <div class="terminal-cmd">
+          <span class="terminal-prompt">$</span>
+          <span id="cmd-text">python trimos.py install --ip 192.168.1.9</span>
+        </div>
+        <button class="copy-btn" onclick="copyCommand()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span id="copy-label">Copy</span>
+        </button>
+      </div>
+
+      <!-- Interactive 4K TV Showcase Frame -->
+      <div class="tv-mockup-wrapper">
+        <div class="tv-frame">
+          <div class="tv-screen">
+            <img id="tv-display" src="docs/screenshots/01_home_apple_tv.png" alt="TrimOS Apple TV Home Screen Preview">
+            <div class="tv-screen-caption" id="tv-caption">
+              <span>🍎 Apple TV Home: 4K NASA Satellite Backdrops & Fluid Elevation</span>
+              <span style="color: #30d158;">● Active 60fps</span>
+            </div>
+          </div>
+        </div>
+        <div class="tv-stand"></div>
+        <div class="tv-stand-base"></div>
+
+        <!-- TV Switcher Pills -->
+        <div class="tv-pills">
+          <button class="tv-pill-btn active" onclick="switchTvScreen('docs/screenshots/01_home_apple_tv.png', '🍎 Apple TV Home: 4K NASA Satellite Backdrops & Fluid Elevation', this)">
+            🏠 Apple TV Home
+          </button>
+          <button class="tv-pill-btn" onclick="switchTvScreen('docs/screenshots/02_virtual_mouse_touchpad.png', '📱 Mobile Remote: Smooth Touchpad with Click & Drag Support', this)">
+            🖱️ Mobile Touchpad
+          </button>
+          <button class="tv-pill-btn" onclick="switchTvScreen('docs/screenshots/03_smarttube_adfree.png', '📺 Ad-Free SmartTube: Integrated SponsorBlock & 4K Playback', this)">
+            📺 SmartTube 4K
+          </button>
+          <button class="tv-pill-btn" onclick="switchTvScreen('docs/screenshots/04_theme_switcher.png', '🎨 32 Built-In Themes: On-Device Instant Style Switcher', this)">
+            🎨 32 Themes
+          </button>
+          <button class="tv-pill-btn" onclick="switchTvScreen('docs/screenshots/05_universal_search.png', '🔍 Universal Search: Netflix, SmartTube, Prime & Disney+', this)">
+            🔍 Universal Search
+          </button>
+          <button class="tv-pill-btn" onclick="switchTvScreen('docs/screenshots/09_ram_cleaner.png', '🧹 1-Click RAM Cleaner: Reclaim up to 600 MB Memory Instantly', this)">
+            🧹 RAM Cleaner
+          </button>
+          <button class="tv-pill-btn" onclick="switchTvScreen('docs/screenshots/10_aerial_screensaver.png', '🌌 Aerial Screensaver: Orbital NASA Views with Typography Clock', this)">
+            🌌 Aerial Saver
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats Strip -->
+      <div class="stats-strip">
+        <div class="stat-item">
+          <div class="stat-value">0%</div>
+          <div class="stat-label">Ads & Autoplay Videos</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">~22 MB</div>
+          <div class="stat-label">Minimal RAM Footprint</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">60 FPS</div>
+          <div class="stat-label">Ultra-Fluid Navigation</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">32</div>
+          <div class="stat-label">Built-in 4K Themes</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">100%</div>
+          <div class="stat-label">Reversible (No Root)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Before / After Comparison -->
+    <section id="comparison" class="section container">
+      <div class="section-header">
+        <div class="section-tag">Direct Comparison</div>
+        <h2 class="section-title">Factory Smart TV vs. TrimOS</h2>
+        <p class="section-desc">Drag the interactive slider to see how TrimOS completely eliminates intrusive manufacturer bloatware.</p>
+      </div>
+
+      <div class="comparison-container">
+        <div class="comparison-slider" id="comp-slider">
+          <!-- Before (Factory) -->
+          <div class="comparison-side side-before">
+            <div class="comparison-content">
+              <span class="comparison-badge badge-bad">❌ Factory Smart TV</span>
+              <h3 class="comparison-heading">Bloated & Sluggish</h3>
+              <ul class="comparison-list">
+                <li>❌ Persistent full-screen video ads & autoplay trailers</li>
+                <li>❌ Consumes 600 MB – 1.2 GB of scarce RAM</li>
+                <li>❌ Stuttery UI, input delay & sluggish boot time</li>
+                <li>❌ Mandatory 30-second unskippable YouTube ads</li>
+                <li>❌ Frustrating D-pad keyboard password typing</li>
+                <li>❌ Hardcoded vendor sponsor buttons on remote</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- After (TrimOS) -->
+          <div class="comparison-side side-after" id="side-after">
+            <div class="comparison-content">
+              <span class="comparison-badge badge-good">🟢 TrimOS Clean Environment</span>
+              <h3 class="comparison-heading">Apple TV Fluid Perfection</h3>
+              <ul class="comparison-list">
+                <li>🟢 100% Ad-Free, zero banners, zero autoplay trailers</li>
+                <li>🟢 Ultra-light ~22 MB RAM footprint (saves 80% RAM)</li>
+                <li>🟢 Instant 60fps fluid UI inspired by Apple TV</li>
+                <li>🟢 Ad-free SmartTube with automatic SponsorBlock</li>
+                <li>🟢 Scan QR code to type passwords from phone keyboard</li>
+                <li>🟢 Full trackpad with mouse cursor & drag-and-drop</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Slider Divider -->
+          <div class="comparison-divider" id="comp-divider">
+            <div class="divider-handle">⇄</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bento Grid Features Showcase -->
+    <section id="features" class="section container">
+      <div class="section-header">
+        <div class="section-tag">Engineered for Excellence</div>
+        <h2 class="section-title">Everything you wished your TV had.</h2>
+        <p class="section-desc">From fluid Apple TV animations to mobile virtual trackpads, TrimOS redefines your smart TV.</p>
+      </div>
+
+      <div class="bento-grid">
+        <!-- Feature 1: Apple TV UI -->
+        <div class="bento-card bento-card-8">
+          <div>
+            <div class="card-icon">🍎</div>
+            <h3 class="card-title">Apple TV Spatial Design & Personal Greetings</h3>
+            <p class="card-desc">
+              Experience the clean, focused simplicity of Apple TV on any Android or Google TV. Featuring dynamic 4K NASA satellite aerial photography, subtle tile elevation on hover, and personalized greetings that cycle for your family members.
+            </p>
+          </div>
+          <div class="card-media">
+            <img src="docs/screenshots/01_home_apple_tv.png" alt="TrimOS Apple TV Home Screen">
+          </div>
+        </div>
+
+        <!-- Feature 2: Mobile Remote & Touchpad -->
+        <div class="bento-card bento-card-4">
+          <div>
+            <div class="card-icon">📱</div>
+            <h3 class="card-title">Mobile Touchpad Remote</h3>
+            <p class="card-desc">
+              Open <code>http://&lt;tv-ip&gt;:8080</code> on your phone. Glide a smooth mouse pointer, tap to click, and toggle Drag Mode to click-and-drag across the TV screen.
+            </p>
+          </div>
+          <div class="card-media" style="aspect-ratio: 4 / 3;">
+            <img src="docs/screenshots/02_virtual_mouse_touchpad.png" alt="Mobile Touchpad Remote">
+          </div>
+        </div>
+
+        <!-- Feature 3: SmartTube Ad-Free -->
+        <div class="bento-card bento-card-4">
+          <div>
+            <div class="card-icon">📺</div>
+            <h3 class="card-title">Ad-Free SmartTube</h3>
+            <p class="card-desc">
+              Bundled with SponsorBlock integration that automatically skips sponsorships, intro animations, and subscriber begging.
+            </p>
+          </div>
+          <div class="card-media" style="aspect-ratio: 16 / 9;">
+            <img src="docs/screenshots/03_smarttube_adfree.png" alt="SmartTube 4K on TV">
+          </div>
+        </div>
+
+        <!-- Feature 4: Interactive RAM Cleaner -->
+        <div class="bento-card bento-card-4">
+          <div>
+            <div class="card-icon">🧹</div>
+            <h3 class="card-title">1-Click RAM Cleaner</h3>
+            <p class="card-desc">
+              Safely terminates cached background processes with a single click, instantly reclaiming hundreds of megabytes of memory.
+            </p>
+          </div>
+          <div class="ram-cleaner-widget">
+            <div class="ram-meter-circle" id="ram-meter">
+              <span class="ram-val" id="ram-val">82%</span>
+              <span class="ram-lbl">RAM USED</span>
+            </div>
+            <button class="clean-btn" onclick="demoCleanRam()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              </svg>
+              <span id="clean-btn-text">Boost & Free RAM</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Feature 5: Universal Search -->
+        <div class="bento-card bento-card-4">
+          <div>
+            <div class="card-icon">🔍</div>
+            <h3 class="card-title">Universal Streaming Search</h3>
+            <p class="card-desc">
+              Search once across Netflix, SmartTube, Amazon Prime Video, and Disney+ Hotstar by title, actor, or genre.
+            </p>
+          </div>
+          <div class="card-media" style="aspect-ratio: 16 / 9;">
+            <img src="docs/screenshots/05_universal_search.png" alt="Universal Streaming Search">
+          </div>
+        </div>
+
+        <!-- Feature 6: QR Mobile Sign-In -->
+        <div class="bento-card bento-card-6">
+          <div>
+            <div class="card-icon">⌨️</div>
+            <h3 class="card-title">Scan QR & Type on Phone</h3>
+            <p class="card-desc">
+              Never type passwords with a remote control again. Scan the QR code with your phone and use your smartphone's native keyboard or password manager to instantly autofill passwords to the TV clipboard.
+            </p>
+          </div>
+          <div class="card-media">
+            <img src="docs/screenshots/06_mobile_qr_signin.png" alt="Mobile QR Sign-in">
+          </div>
+        </div>
+
+        <!-- Feature 7: Remote Button Remapper -->
+        <div class="bento-card bento-card-6">
+          <div>
+            <div class="card-icon">🎛️</div>
+            <h3 class="card-title">Remote Button Remapping</h3>
+            <p class="card-desc">
+              Remap sponsored buttons (Netflix, Prime, color keys, Menu, Back, or number buttons) to instantly trigger RAM Cleaner, Universal Search, Theme Switcher, or your favorite apps.
+            </p>
+          </div>
+          <div class="card-media">
+            <img src="docs/screenshots/07_remote_remapper.png" alt="Remote Remapper">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 32 Themes Showcase -->
+    <section id="themes" class="section container">
+      <div class="section-header">
+        <div class="section-tag">Aesthetic Diversity</div>
+        <h2 class="section-title">32 Built-In Themes. Instant Switch.</h2>
+        <p class="section-desc">From pure OLED blacks to atmospheric northern lights and festive designs, customize your living room in seconds.</p>
+      </div>
+
+      <div class="themes-carousel">
+        <div class="theme-thumb-card" onclick="switchTvScreen('themes/aerial/screenshot.jpg', '🛰️ Aerial: 4K NASA Earth Satellite Photography', null)">
+          <img src="themes/aerial/screenshot.jpg" alt="Aerial Theme">
+          <div class="theme-info">
+            <div class="theme-name">Aerial</div>
+            <div class="theme-tags">NASA Satellite • 4K Earth Views</div>
+          </div>
+        </div>
+
+        <div class="theme-thumb-card" onclick="switchTvScreen('themes/minimal/screenshot.jpg', '🌑 Minimal: OLED Pure True Black', null)">
+          <img src="themes/minimal/screenshot.jpg" alt="Minimal Theme">
+          <div class="theme-info">
+            <div class="theme-name">Minimal</div>
+            <div class="theme-tags">OLED True Black • Distraction Free</div>
+          </div>
+        </div>
+
+        <div class="theme-thumb-card" onclick="switchTvScreen('themes/aurora/screenshot.jpg', '🌌 Aurora: Northern Lights Atmospheric Glow', null)">
+          <img src="themes/aurora/screenshot.jpg" alt="Aurora Theme">
+          <div class="theme-info">
+            <div class="theme-name">Aurora Borealis</div>
+            <div class="theme-tags">Dynamic Green & Violet Radiance</div>
+          </div>
+        </div>
+
+        <div class="theme-thumb-card" onclick="switchTvScreen('themes/midnight-glass/screenshot.jpg', '💎 Midnight Glass: Deep Frosted Glassmorphism', null)">
+          <img src="themes/midnight-glass/screenshot.jpg" alt="Midnight Glass Theme">
+          <div class="theme-info">
+            <div class="theme-name">Midnight Glass</div>
+            <div class="theme-tags">Frosted Acrylic • Deep Indigo</div>
+          </div>
+        </div>
+
+        <div class="theme-thumb-card" onclick="switchTvScreen('themes/cinematic/screenshot.jpg', '🎬 Cinematic: Theatre Ambient Dimming', null)">
+          <img src="themes/cinematic/screenshot.jpg" alt="Cinematic Theme">
+          <div class="theme-info">
+            <div class="theme-name">Cinematic</div>
+            <div class="theme-tags">Theatre Glow • Deep Contrast</div>
+          </div>
+        </div>
+
+        <div class="theme-thumb-card" onclick="switchTvScreen('themes/retro/screenshot.jpg', '🌆 Retro 80s: Synthwave Sunset Grid', null)">
+          <img src="themes/retro/screenshot.jpg" alt="Retro Theme">
+          <div class="theme-info">
+            <div class="theme-name">Retro 80s</div>
+            <div class="theme-tags">Synthwave • Neon Horizon</div>
+          </div>
+        </div>
+
+        <div class="theme-thumb-card" onclick="switchTvScreen('themes/ambient-glass/screenshot.jpg', '🪟 Ambient Glass: Soft Mountain Light', null)">
+          <img src="themes/ambient-glass/screenshot.jpg" alt="Ambient Glass Theme">
+          <div class="theme-info">
+            <div class="theme-name">Ambient Glass</div>
+            <div class="theme-tags">Soft Blur • Daytime Calm</div>
+          </div>
+        </div>
+
+        <div class="theme-thumb-card" onclick="switchTvScreen('themes/weeb/screenshot.jpg', '⚔️ Neon Anime: Vibrant Color Blades', null)">
+          <img src="themes/weeb/screenshot.jpg" alt="Weeb Theme">
+          <div class="theme-info">
+            <div class="theme-name">Neon Anime</div>
+            <div class="theme-tags">Cyberpunk • High Vibrancy</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TV Compatibility Table -->
+    <section id="compatibility" class="section container">
+      <div class="section-header">
+        <div class="section-tag">Universal Support</div>
+        <h2 class="section-title">Engineered for Every Major TV Brand</h2>
+        <p class="section-desc">TrimOS includes dedicated vendor profiles that safely remove brand bloatware while protecting CEC, HDMI inputs, and TV tuner services.</p>
+      </div>
+
+      <div class="compat-table-wrapper">
+        <table class="compat-table">
+          <thead>
+            <tr>
+              <th>Brand / Platform</th>
+              <th>Tested Models</th>
+              <th>What TrimOS Cleans & Optimizes</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="brand-col">
+                <span>🟠</span> Xiaomi / Redmi / Mi TV
+              </td>
+              <td>Mi TV 4A, 4C, 5X, X-Series, Horizon, Redmi TV</td>
+              <td>Safely removes PatchWall launcher, autoplay video banner ads, and recommendation channels. Keeps HDMI-CEC & tuner intact.</td>
+              <td><span class="tag-clean">✓ Verified Safe</span></td>
+            </tr>
+            <tr>
+              <td class="brand-col">
+                <span>🔵</span> Google TV / Chromecast
+              </td>
+              <td>Chromecast with Google TV (HD/4K), Sony Bravia, TCL</td>
+              <td>Disables <code>launcherx</code> ad carousels and sponsored app rows. Core Google Cast & Play Store remain intact.</td>
+              <td><span class="tag-clean">✓ Verified Safe</span></td>
+            </tr>
+            <tr>
+              <td class="brand-col">
+                <span>⚪</span> Stock Android TV (Leanback)
+              </td>
+              <td>Sony Bravia, TCL, Hisense, Philips, Sharp, Skyworth</td>
+              <td>Replaces sluggish Leanback launcher. Picture modes, audio profiles, and HDMI inputs remain 100% functional.</td>
+              <td><span class="tag-clean">✓ Verified Safe</span></td>
+            </tr>
+            <tr>
+              <td class="brand-col">
+                <span>🟧</span> Amazon Fire TV
+              </td>
+              <td>Fire TV Stick 4K / Max, Fire TV Cube, Omni Series</td>
+              <td>Bypasses Fire OS commercial home grid and maps Home button directly to TrimOS.</td>
+              <td><span class="tag-clean">✓ Verified Safe</span></td>
+            </tr>
+            <tr>
+              <td class="brand-col">
+                <span>🔴</span> OnePlus TV
+              </td>
+              <td>OnePlus TV Q1, U1S, Y1S</td>
+              <td>Safely debloats OxygenPlay and vendor recommendation daemons.</td>
+              <td><span class="tag-clean">✓ Verified Safe</span></td>
+            </tr>
+            <tr>
+              <td class="brand-col">
+                <span>🟢</span> Generic Boxes & Projectors
+              </td>
+              <td>Nvidia Shield TV, Mecool, Dynalink, Formuler, X96, HY320</td>
+              <td>Pure 60fps launcher experience with minimal ~22 MB RAM footprint.</td>
+              <td><span class="tag-clean">✓ Verified Safe</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Quick Start Installation -->
+    <section id="quickstart" class="section container">
+      <div class="section-header">
+        <div class="section-tag">Get Started in 60 Seconds</div>
+        <h2 class="section-title">Effortless Installation</h2>
+        <p class="section-desc">No root required. Automated installer detects your TV brand and sets up everything over your local Wi-Fi.</p>
+      </div>
+
+      <div class="steps-container">
+        <!-- Step 1 -->
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <h3 class="step-title">Enable ADB on your TV</h3>
+          <p class="step-desc">
+            Go to TV <strong>Settings</strong> → <strong>Device Preferences</strong> → <strong>About</strong>. Tap <strong>Build</strong> 7 times until you are a developer, then enable <strong>Network / USB Debugging</strong>.
+          </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <h3 class="step-title">Run the 1-Click Installer</h3>
+          <p class="step-desc">
+            Run the universal installer from your computer connected to the same Wi-Fi:
+          </p>
+          <div class="code-block">
+            <span>python trimos.py install --ip &lt;TV_IP&gt;</span>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 10px;">
+            On Windows, you can simply double-click <code>trimos.bat</code>!
+          </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <h3 class="step-title">Enjoy Your New TV</h3>
+          <p class="step-desc">
+            Your TV will instantly launch into TrimOS. Enjoy smooth 60fps navigation, zero ads, ad-free SmartTube, and 32 themes.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Global Translations Section -->
+    <section id="languages" class="section container">
+      <div class="section-header">
+        <div class="section-tag">Global Community</div>
+        <h2 class="section-title">Available in 16 Languages</h2>
+        <p class="section-desc">TrimOS documentation and on-device launcher are fully localized for users worldwide.</p>
+      </div>
+
+      <div class="languages-grid">
+        <a href="README.md" class="lang-item"><span>English</span> <span>🇺🇸 🇬🇧</span></a>
+        <a href="README.de.md" class="lang-item"><span>Deutsch</span> <span>🇩🇪</span></a>
+        <a href="README.es.md" class="lang-item"><span>Español</span> <span>🇪🇸 🇲🇽</span></a>
+        <a href="README.fr.md" class="lang-item"><span>Français</span> <span>🇫🇷</span></a>
+        <a href="README.it.md" class="lang-item"><span>Italiano</span> <span>🇮🇹</span></a>
+        <a href="README.pt-BR.md" class="lang-item"><span>Português (Brasil)</span> <span>🇧🇷</span></a>
+        <a href="README.nl.md" class="lang-item"><span>Nederlands</span> <span>🇳🇱</span></a>
+        <a href="README.tr.md" class="lang-item"><span>Türkçe</span> <span>🇹🇷</span></a>
+        <a href="README.el.md" class="lang-item"><span>Ελληνικά</span> <span>🇬🇷</span></a>
+        <a href="README.he.md" class="lang-item"><span>עברית</span> <span>🇮🇱</span></a>
+        <a href="README.uk.md" class="lang-item"><span>Українська</span> <span>🇺🇦</span></a>
+        <a href="README.uz.md" class="lang-item"><span>Oʻzbekcha</span> <span>🇺🇿</span></a>
+        <a href="README.vi.md" class="lang-item"><span>Tiếng Việt</span> <span>🇻🇳</span></a>
+        <a href="README.ja.md" class="lang-item"><span>日本語</span> <span>🇯🇵</span></a>
+        <a href="README.zh-CN.md" class="lang-item"><span>简体中文</span> <span>🇨🇳</span></a>
+        <a href="README.zh-TW.md" class="lang-item"><span>繁體中文</span> <span>🇹🇼</span></a>
+      </div>
+    </section>
+
+    <!-- FAQ Accordion -->
+    <section class="section container">
+      <div class="section-header">
+        <div class="section-tag">Frequently Asked Questions</div>
+        <h2 class="section-title">Everything You Need to Know</h2>
+      </div>
+
+      <div class="faq-grid">
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            <span>Does installing TrimOS void my smart TV warranty?</span>
+            <span class="faq-icon">▼</span>
+          </div>
+          <div class="faq-answer">
+            No. TrimOS does not root your television or flash custom recovery partitions. It operates using standard Android <code>pm disable-user</code> commands that disable bloatware only in user space. Your factory firmware remains 100% untouched.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            <span>How do I revert back to the stock factory home screen?</span>
+            <span class="faq-icon">▼</span>
+          </div>
+          <div class="faq-answer">
+            You can restore your original manufacturer launcher in seconds with one command: <code>python trimos.py restore --ip &lt;TV_IP&gt;</code>. This immediately re-enables your stock home screen (PatchWall, Google TV, etc.).
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            <span>Will Netflix, Prime Video, and HDMI inputs still work?</span>
+            <span class="faq-icon">▼</span>
+          </div>
+          <div class="faq-answer">
+            Yes, completely! TrimOS preserves all TV input switching, HDMI-CEC connections, audio return channels (ARC), and DRM Widevine L1 4K playback.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            <span>Does the Home button stay locked across cold reboots?</span>
+            <span class="faq-icon">▼</span>
+          </div>
+          <div class="faq-answer">
+            Yes. TrimOS includes a built-in accessibility service (<code>HomeKeyService</code>) and boot receiver that locks the remote Home key to TrimOS across device restarts and power cycles.
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="brand">
+          <span class="brand-icon">🍎</span>
+          <span>TrimOS</span>
+          <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 400;">— The Clean Apple TV Environment</span>
+        </div>
+
+        <div class="footer-links">
+          <a href="https://github.com/chiragchanchal/TrimOS" target="_blank">GitHub</a>
+          <a href="release/TrimOS-v1.0.apk">Download APK</a>
+          <a href="README.md">Documentation</a>
+          <a href="LICENSE">MIT License</a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>Built for a faster, cleaner, and ad-free TV experience. Released under the open-source MIT License.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Copy Command Function
+    function copyCommand() {
+      const text = document.getElementById('cmd-text').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const label = document.getElementById('copy-label');
+        label.innerText = 'Copied! ✓';
+        setTimeout(() => { label.innerText = 'Copy'; }, 2000);
+      });
+    }
+
+    // Interactive TV Display Switcher
+    function switchTvScreen(src, caption, btn) {
+      const img = document.getElementById('tv-display');
+      const cap = document.getElementById('tv-caption');
+      
+      img.style.opacity = '0.3';
+      img.style.transform = 'scale(0.98)';
+      
+      setTimeout(() => {
+        img.src = src;
+        cap.querySelector('span:first-child').innerText = caption;
+        img.style.opacity = '1';
+        img.style.transform = 'scale(1)';
+      }, 150);
+
+      if (btn) {
+        document.querySelectorAll('.tv-pill-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+    }
+
+    // Interactive Before & After Slider
+    const compSlider = document.getElementById('comp-slider');
+    const sideAfter = document.getElementById('side-after');
+    const compDivider = document.getElementById('comp-divider');
+
+    let isSliding = false;
+
+    function updateSlider(x) {
+      const rect = compSlider.getBoundingClientRect();
+      let pos = (x - rect.left) / rect.width;
+      pos = Math.max(0.05, Math.min(0.95, pos));
+      const percentage = pos * 100;
+      
+      sideAfter.style.clipPath = `polygon(0 0, ${percentage}% 0, ${percentage}% 100%, 0 100%)`;
+      compDivider.style.left = `${percentage}%`;
+    }
+
+    compSlider.addEventListener('mousedown', () => isSliding = true);
+    window.addEventListener('mouseup', () => isSliding = false);
+    window.addEventListener('mousemove', (e) => {
+      if (!isSliding) return;
+      updateSlider(e.clientX);
+    });
+
+    compSlider.addEventListener('touchstart', () => isSliding = true);
+    window.addEventListener('touchend', () => isSliding = false);
+    window.addEventListener('touchmove', (e) => {
+      if (!isSliding) return;
+      updateSlider(e.touches[0].clientX);
+    });
+
+    // Demo RAM Cleaner Action
+    let cleaned = false;
+    function demoCleanRam() {
+      const meter = document.getElementById('ram-meter');
+      const val = document.getElementById('ram-val');
+      const btn = document.getElementById('clean-btn-text');
+      
+      if (!cleaned) {
+        btn.innerText = 'Cleaning...';
+        meter.style.transform = 'rotate(360deg)';
+        setTimeout(() => {
+          meter.style.borderTopColor = '#30d158';
+          val.innerText = '18%';
+          btn.innerText = 'Reclaimed 412 MB! ✓';
+          cleaned = true;
+        }, 600);
+      } else {
+        meter.style.transform = 'rotate(0deg)';
+        val.innerText = '82%';
+        btn.innerText = 'Boost & Free RAM';
+        cleaned = false;
+      }
+    }
+
+    // FAQ Accordion Toggle
+    function toggleFaq(item) {
+      item.classList.toggle('open');
+    }
+  </script>
+</body>
+</html>

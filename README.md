@@ -8,12 +8,15 @@
 *Transform any sluggish, ad-bloated smart TV into a lightning-fast, Apple TV-inspired experience.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Website](https://img.shields.io/badge/Website-chiragchanchal.github.io%2FTrimOS-blue?style=flat&logo=googlechrome&logoColor=white)](https://chiragchanchal.github.io/TrimOS/)
 [![Android TV](https://img.shields.io/badge/Android%20TV-5.0%20to%2014+-brightgreen.svg)](https://android.com/tv)
 [![No Root Required](https://img.shields.io/badge/Root-NOT%20Required-success.svg)](#)
 [![RAM Footprint](https://img.shields.io/badge/RAM%20Footprint-~22%20MB-purple.svg)](#)
 [![Ad-Free](https://img.shields.io/badge/Ads-0%25%20Bloat-red.svg)](#)
 
 [English](README.md) • [Deutsch](README.de.md) • [Español](README.es.md) • [Français](README.fr.md) • [Italiano](README.it.md) • [Português (Brasil)](README.pt-BR.md) • [Nederlands](README.nl.md) • [Türkçe](README.tr.md) • [Ελληνικά](README.el.md) • [עברית](README.he.md) • [Українська](README.uk.md) • [Oʻzbekcha](README.uz.md) • [Tiếng Việt](README.vi.md) • [日本語](README.ja.md) • [简体中文](README.zh-CN.md) • [繁體中文](README.zh-TW.md)
+
+🌐 **[Visit Live Website & Showcase](https://chiragchanchal.github.io/TrimOS/)**
 
 [Features](#-why-trimos) • [Screenshots](#-visual-showcase) • [Quick Start](#-quick-start) • [Supported TVs](#-supported-tvs--profiles) • [Mobile Remote](#-mobile-sign-in--touchpad-remote) • [Restore](#-safety--1-click-restore)
 
@@ -132,7 +135,7 @@ Smart TVs today are plagued by intrusive full-screen video ads, autoplay promoti
 Clone the repository and run the universal installer:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/TrimOS.git
+git clone https://github.com/chiragchanchal/TrimOS.git
 cd TrimOS
 ```
 
