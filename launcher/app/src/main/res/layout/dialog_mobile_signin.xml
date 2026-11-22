@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:background="@drawable/glass_panel"
+    android:padding="24dp"
+    android:minWidth="500dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="📱 Mobile Sign-In &amp; Remote"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginBottom="4dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Scan with your phone to type passwords, autofill, or control TV"
+        android:textColor="#B0FFFFFF"
+        android:textSize="13sp"
+        android:layout_marginBottom="16dp" />
+
+    <ImageView
+        android:id="@+id/imgQrCode"
+        android:layout_width="220dp"
+        android:layout_height="220dp"
+        android:background="#FFFFFF"
+        android:padding="8dp"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:id="@+id/textTvUrl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="http://192.168.1.9:8080"
+        android:textColor="#0A84FF"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Make sure your phone is connected to the same Wi-Fi network"
+        android:textColor="#80FFFFFF"
+        android:textSize="12sp"
+        android:layout_marginBottom="16dp" />
+
+    <Button
+        android:id="@+id/btnCloseQr"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:text="Done"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/pill_bg" />
+
+</LinearLayout>

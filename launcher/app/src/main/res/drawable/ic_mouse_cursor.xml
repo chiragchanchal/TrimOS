@@ -1,0 +1,18 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="28dp"
+    android:height="28dp"
+    android:viewportWidth="28"
+    android:viewportHeight="28">
+    <!-- Cursor Drop Shadow -->
+    <path
+        android:fillColor="#80000000"
+        android:pathData="M5,3 L5,23 L10,18 L15,26 L18,24 L13,16 L20,16 Z"/>
+    <!-- Cursor Main Body -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M4,2 L4,21 L9,16 L14,24 L16.5,22.5 L11.5,14.5 L18,14.5 Z"/>
+    <!-- Cursor Inner Line -->
+    <path
+        android:fillColor="#FF0A84FF"
+        android:pathData="M6,6 L6,17 L9,14 L13,20.5 L14.5,19.5 L10.5,13 L15,13 Z"/>
+</vector>
